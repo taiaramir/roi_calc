@@ -7,9 +7,28 @@ from streamlit import session_state as state
 
 st.set_page_config(page_title="Folio ROI Calculator", layout="wide")
 
-def main():
-    st.title('Folio ROI Calculator')
+# Add this custom CSS
+st.markdown("""
+<style>
+.metric-container {
+    margin-bottom: 20px;
+}
+.metric-label {
+    font-size: 16px;
+    color: #888;
+    margin-bottom: 0;
+}
+.metric-value {
+    font-size: 24px;
+    font-weight: 300;  /* This makes the font light weight */
+    color: #4CAF50;
+    margin-top: 0;
+}
+</style>
+""", unsafe_allow_html=True)
 
+
+def main():
     # Plan selection
     selected_plan = st.sidebar.selectbox('Select Plan:', options=list(PLANS.keys()), key='plan_select')
     plan_data = PLANS[selected_plan]
@@ -43,21 +62,41 @@ def main():
 
     display_assumptions()
 
-
 def display_results(results):
-    st.header('ROI Results')
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Total Original Value", f"${results['total_original_value']:,.2f}")
-        st.metric("Total New Value with Folio", f"${results['total_new_value_folio']:,.2f}")
-        st.metric("Net Gain from Folio", f"${results['net_gain']:,.2f}")
+        st.markdown(f"""
+            <div class='metric-container'>
+                <p class='metric-label'>Total Original Value</p>
+                <p class='metric-value'>${int(results['total_original_value']):,}</p>
+            </div>
+            <div class='metric-container'>
+                <p class='metric-label'>Total New Value with Folio</p>
+                <p class='metric-value'>${int(results['total_new_value_folio']):,}</p>
+            </div>
+            <div class='metric-container'>
+                <p class='metric-label'>Net Gain from Folio</p>
+                <p class='metric-value'>${int(results['net_gain']):,}</p>
+            </div>
+        """, unsafe_allow_html=True)
+    
     with col2:
-        st.metric("ROI for Folio", f"{results['roi']:.2f}%")
-        st.metric("Folio pays for itself", f"{results['pay_for_itself']:.2f} times over")
-        st.metric("Additional Closed Deals", f"{results['total_new_value_folio'] / results['closed_pitch_value']:.0f}")
+        st.markdown(f"""
+            <div class='metric-container'>
+                <p class='metric-label'>ROI for Folio</p>
+                <p class='metric-value'>{int(results['roi'])}%</p>
+            </div>
+            <div class='metric-container'>
+                <p class='metric-label'>Folio pays for itself</p>
+                <p class='metric-value'>{results['pay_for_itself']:.1f} times over</p>
+            </div>
+            <div class='metric-container'>
+                <p class='metric-label'>Additional Closed Deals</p>
+                <p class='metric-value'>{int(results['total_new_value_folio'] / results['closed_pitch_value'])}</p>
+            </div>
+        """, unsafe_allow_html=True)
 
 def display_visualizations(results):
-    st.header('Visualizations')
     fig = create_comparison_chart(results['total_original_value'], results['total_new_value_folio'])
     st.plotly_chart(fig)
 
